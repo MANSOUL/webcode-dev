@@ -1,0 +1,43 @@
+{
+  "name": "koascaffold",
+  "version": "1.0.0",
+  "description": "scaffold base on koa.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js --config ./nodemon.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MANSOUL/koaScaffold.git"
+  },
+  "keywords": [
+    "scaffold",
+    "koa"
+  ],
+  "author": "KuangGuanghu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MANSOUL/koaScaffold/issues"
+  },
+  "homepage": "https://github.com/MANSOUL/koaScaffold#readme",
+  "dependencies": {
+    "folder-walker": "^3.2.0",
+    "is-image": "^3.0.0",
+    "jsonwebtoken": "^8.5.0",
+    "koa": "^2.7.0",
+    "koa-body": "^4.0.8",
+    "koa-router": "^7.4.0",
+    "koa-send": "^5.0.0",
+    "koa-static": "^5.0.0",
+    "node-pty": "^0.9.0",
+    "qiniu": "^7.2.1",
+    "walk-sync": "^2.0.2",
+    "walkdir": "^0.4.1",
+    "ws": "^7.2.0",
+    "redis": "^3.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^6.7.2",
+    "nodemon": "^2.0.2"
+  }
+}
