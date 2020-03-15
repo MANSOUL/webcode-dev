@@ -7,6 +7,10 @@ const setAsync = promisify(client.set).bind(client)
 const hmSetAsync = promisify(client.hmset).bind(client)
 const getAsync = promisify(client.get).bind(client)
 
+client.flushdb( (err, succeeded) => {
+  console.log(succeeded) // will be true if successfull
+})
+
 client.on('error', function (error) {
   console.error(error)
 })

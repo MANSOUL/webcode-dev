@@ -31,12 +31,12 @@ module.exports = ws => {
         changes.push(change)
         receipt = {relative, type, versionId: change.versionId}
       } else {
-        const versionId = change.versionId
-        if (versionId !== changes.slice(-1)[0].versionId + 1) {
-          console.log('文件操作序列有误')
-          return
-        }
-        (changes.length !== 0) && new Editor(filePath, changes).exec().save()
+        const {
+          versionId,
+          startVersionId,
+          endVersionId
+        } = change;
+        (changes.length !== 0) && new Editor(filePath, changes, versionId, startVersionId, endVersionId).exec().save()
         changes = []
         receipt = {
           relative,

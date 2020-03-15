@@ -1,13 +1,16 @@
 const fs = require('fs')
 
 class Editor {
-  constructor(path, queue) {
+  constructor(path, queue, versionId, startVersionId, endVersionId) {
     if (queue.length === 0) {
       throw new Error('无文件操作')
     }
     this.lines = null
     this.path = path
     this.queue = queue
+    this.versionId = versionId
+    this.startVersionId = startVersionId
+    this.endVersionId = endVersionId
     this.eol = queue[0].eol
     this.regLine = new RegExp(this.eol)
   }
@@ -24,8 +27,12 @@ class Editor {
 
   detect() {
     const queue = this.queue
+    const last = queue[queue.length - 1].versionId
     let start = queue[0].versionId
-
+    if (this.versionId !== (last + 1) || this.startVersionId !== start || this.endVersionId !== last) {
+      return false
+    }
+    // 序列检测
     for (let i = 0; i < queue.length; i++) {
       const q = queue[i]
       if (q.versionId !== start) {
@@ -38,15 +45,20 @@ class Editor {
   }
 
   exec() {
-    if (!this.detect()) return this
+    if (!this.detect()) throw new Error('操作序列有误')
     const content = this.read()
     const lines = content.split(this.regLine)
     const queue = this.queue
     for (let i = 0; i < queue.length; i++) {
       const q = queue[i]
       const change = q.changes[0]
-      const text = change.text
-      let {startLineNumber, endLineNumber, startColumn, endColumn} = change.range
+      const {
+        text,
+        range,
+        rangeLength,
+        rangeOffset,
+      } = change
+      let {startLineNumber, endLineNumber, startColumn, endColumn} = range
       startLineNumber--
       endLineNumber--
       startColumn--
@@ -78,20 +90,14 @@ class Editor {
         } else {
           const lineCount = endLineNumber - startLineNumber
           if (lineCount === 0) { // 单行插入字符
-            let nextQ = queue[i + 1]
-            let nextQChange = nextQ ? nextQ.changes[0] : undefined
-            if (nextQ && (nextQChange.text.length > 1 || nextQChange.range.endColumn > nextQChange.range.startColumn)) {
-              // 中文输入法拼音输入
-              continue
-            }
-            lines[startLineNumber] = this.execInsertWord(lines[startLineNumber], startColumn, text)
+            lines[startLineNumber] = this.execInsertWord(lines[startLineNumber], text, startColumn, endColumn, rangeLength, rangeOffset)
           } else { // 选择了多行插入，删除行，再插入
             // 删除第一行的某些字符
             lines[startLineNumber] = this.execRemoveWord(lines[startLineNumber], startColumn)
             // 删除最后一行的某些字符
             lines[endLineNumber] = this.execRemoveWord(lines[endLineNumber], 0, endColumn)
             // 插入字符
-            lines[startLineNumber] = this.execInsertWord(lines[startLineNumber], startColumn, text)
+            lines[startLineNumber] = this.execInsertWord(lines[startLineNumber], text, startColumn, endColumn, rangeLength, rangeOffset)
             // 合并
             this.execCollapseLine(lines, startLineNumber, endLineNumber)
             // 删除中间行
@@ -106,9 +112,15 @@ class Editor {
     return this
   }
 
-  execInsertWord(line, startColumn, text) {
+  execInsertWord(line, text, startColumn, endColumn, rangeLength, rangeOffset) {
     const characters = line.split('')
-    characters.splice(startColumn , 0, text)
+    if (rangeLength === 0) { 
+      // rangeLength 为 0，直接插入
+      characters.splice(startColumn , 0, text)
+    } else {
+      // 替换
+      characters.splice(startColumn, endColumn - startColumn, text)
+    }
     return characters.join('')
   }
   
