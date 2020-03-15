@@ -70,12 +70,11 @@ class Editor {
           lines[startLineNumber] = startLine
         } else {
           lines[startLineNumber] = this.execRemoveWord(lines[startLineNumber], startColumn)
-          let endLine = this.execRemoveWord(lines[endLineNumber], 0, endColumn)
-          endLine === '' ? this.execRemoveLine(lines, endLineNumber) : (lines[endLineNumber] = endLine)
-          if (lineCount > 1) { // 影响多行
-            for (let i = startLineNumber + 1; i < endLineNumber; i++) {
-              this.execRemoveLine(lines, startLineNumber+1)
-            }
+          lines[endLineNumber] = this.execRemoveWord(lines[endLineNumber], 0, endColumn)
+          this.execCollapseLine(lines, startLineNumber, endLineNumber)
+          // 删除中间行
+          for (let i = startLineNumber + 1; i <= endLineNumber; i++) {
+            this.execRemoveLine(lines, startLineNumber + 1)
           }
         }
       } else {
