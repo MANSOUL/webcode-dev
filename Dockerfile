@@ -1,6 +1,6 @@
 FROM ubuntu
 RUN apt-get update
-RUN apt upgrade
+RUN apt upgrade -y
 RUN apt install -y curl
 RUN apt-get install -y build-essential
 # nodejs

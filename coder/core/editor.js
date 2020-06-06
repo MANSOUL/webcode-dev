@@ -78,7 +78,7 @@ class Editor {
           }
         }
       } else {
-        if(this.regLine.test(text)) { // 插入的是换行
+        if (new RegExp('^' + this.eol).test(text)) { // 插入的是换行
           if (lines[startLineNumber].length <= startColumn) {
             this.execInsertLine(lines, startLineNumber, text.split(this.regLine)[1])
           }
