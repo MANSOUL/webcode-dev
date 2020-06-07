@@ -12,6 +12,11 @@ const unserialize = data => {
   return data
 }
 
+const createReceipt = (ok, receipt) => ({
+  ok,
+  receipt
+})
+
 module.exports = ws => {
   ws.on('message', async message => {
     const data = JSON.parse(message)
@@ -24,31 +29,51 @@ module.exports = ws => {
     const filePath = path.resolve(projectDir, project, relative)
 
     try {
-      let changes = unserialize(await get(filePath))
       let receipt = null
+      let changes = unserialize(await get(filePath))
       if (!changes) changes = []
-      if (type === 'edit') {
-        changes.push(change)
-        receipt = {relative, type, versionId: change.versionId}
-      } else {
+      if (type === 'postall') {
         const {
           versionId,
           startVersionId,
-          endVersionId
+          endVersionId,
+          changes: allChanges
         } = change;
-        (changes.length !== 0) && new Editor(filePath, changes, versionId, startVersionId, endVersionId).exec().save()
+        (allChanges.length !== 0) && new Editor(filePath, allChanges, versionId, startVersionId, endVersionId).exec().save()
         changes = []
         receipt = {
           relative,
           type,
           versionId
         }
+      } else {
+        if (type === 'edit') {
+          changes.push(change)
+          receipt = {relative, type, versionId: change.versionId}
+        } else if(type === 'save') {
+          const {
+            versionId,
+            startVersionId,
+            endVersionId
+          } = change;
+          (changes.length !== 0) && new Editor(filePath, changes, versionId, startVersionId, endVersionId).exec().save()
+          changes = []
+          receipt = {
+            relative,
+            type,
+            versionId
+          }
+        }
       }
       await set(filePath, serialize(changes))
       // 发送回执
-      ws.send(JSON.stringify(receipt))
+      ws.send(JSON.stringify(createReceipt(true, receipt)))
     } catch (error) {
       console.log(error)
+      ws.send(JSON.stringify(createReceipt(false, {
+        relative,
+        type
+      })))
     }
   })
 
