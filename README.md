@@ -16,7 +16,7 @@
 
 ### 容器中运行
 
-1. `$ cd workspace`
+1. `$ cd coder`
 2. `$ npm install`
 3. `$ npm start`
 

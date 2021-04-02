@@ -45,9 +45,7 @@ router.put('/api/file/:project', ctx => {
     project
   } = ctx.params
   const {
-    relative
-  } = ctx.query
-  const {
+    relative,
     content
   } = ctx.request.body
   const filePath = path.resolve(projectDir, project, relative)

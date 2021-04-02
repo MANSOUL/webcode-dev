@@ -4,7 +4,7 @@ const {
 } = require('../../fileHelper/project')
 const projectDir = getProjectPath()
 const Editor = require('../../core/editor')
-const {set, get} = require('./redis')
+// const {set, get} = require('./redis')
 
 const serialize = data => JSON.stringify(data)
 const unserialize = data => {
@@ -16,6 +16,8 @@ const createReceipt = (ok, receipt) => ({
   ok,
   receipt
 })
+
+const db = {}
 
 module.exports = ws => {
   ws.on('message', async message => {
@@ -30,7 +32,8 @@ module.exports = ws => {
 
     try {
       let receipt = null
-      let changes = unserialize(await get(filePath))
+      // let changes = unserialize(await get(filePath))
+      let changes = db[filePath]
       if (!changes) changes = []
       if (type === 'postall') {
         const {
@@ -65,7 +68,8 @@ module.exports = ws => {
           }
         }
       }
-      await set(filePath, serialize(changes))
+      // await set(filePath, serialize(changes))
+      db[filePath] = changes
       // 发送回执
       ws.send(JSON.stringify(createReceipt(true, receipt)))
     } catch (error) {
